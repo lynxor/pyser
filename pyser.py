@@ -94,7 +94,7 @@ def play(episode):
 	
 def play_video(filepath):
 	MPLAYERLOG = open('mplayer.log', 'w')
-	process = subprocess.Popen(["mplayer", join(mypath, filepath)], stdout=MPLAYERLOG, stderr=MPLAYERLOG)last
+	process = subprocess.Popen(["mplayer", join(mypath, filepath)], stdout=MPLAYERLOG, stderr=MPLAYERLOG)
 	output = process.communicate()[0]
 	print "Done playing video, next?"
 
