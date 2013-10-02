@@ -10,8 +10,7 @@ import signal
 
 
 filetypes=['mkv','avi','mpg','mp4']
-mypath = "."
-continue_file = join(mypath, ".series_continue")
+mypath = "./"
 keywords_pattern = re.compile(".*")
 keywords = None
 deep = True
@@ -142,7 +141,11 @@ parser.add_argument("-k", "--keywords", dest="keywords", help='Keywords for sear
 args = parser.parse_args()
 
 if(args.path != None):
-	mypath = args.path
+	mypath = join(mypath, args.path)
+	print mypath
+
+continue_file = join(mypath, ".series_continue")
+
 if(args.keywords != None):
 	keywords = args.keywords.split(",")
 	lookaround_keywords = [ ("(?=.*" + f + ")") for f in keywords ]
