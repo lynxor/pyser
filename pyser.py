@@ -5,7 +5,7 @@ import argparse
 import subprocess
 import os
 from os import listdir
-from os.path import isfile, join
+from os.path import isfile, join, walk
 import signal
 
 
@@ -14,9 +14,24 @@ mypath = "."
 continue_file = join(mypath, ".series_continue")
 keywords_pattern = re.compile(".*")
 keywords = None
+deep = True
+MAX_DEPTH = 2
 
 def video_files():
-	return [ f for f in listdir(mypath) if (isfile(join(mypath,f)) and is_video_file(f)) ]
+	if not deep:
+		return [ f for f in listdir(mypath) if (isfile(join(mypath,f)) and is_video_file(f)) ]
+	else :
+		return deep_files(mypath, 1)
+
+def deep_files(dir, depth):
+	found_files = []
+	if depth > MAX_DEPTH:
+		return []
+
+	for root, dirs, files in os.walk(mypath):
+		found_files = found_files + [ join(root,f) for f in files if (isfile(join(root,f)) and is_video_file(f)) ]
+	return found_files 
+
 
 def is_video_file(f):
 	for t in filetypes:
@@ -27,7 +42,7 @@ def is_video_file(f):
 def list_files(files):
 
 	for (n,f) in enumerate(files):
-		print str(n + 1) + ". " + f;
+		print str(n + 1) + ". " + f
 
 def read_int():
 		line = raw_input()
@@ -120,6 +135,7 @@ parser.add_argument('-c', '--continue', dest="tsuzuke", action='store_true',
                    help='Continue where left off previous time')
 
 parser.add_argument('-s', '--status', dest="status", action='store_true', help='Does continue file exist')
+parser.add_argument('-d', '--deep', dest="deep", action='store_true', help='Search deep for files - default true', default=True)
 parser.add_argument("episode", nargs="?", type=int, help='Number of episode')
 parser.add_argument("-p", "--path", dest="path", help='Custom path, default is .')
 parser.add_argument("-k", "--keywords", dest="keywords", help='Keywords for searching eps, comma separated')
