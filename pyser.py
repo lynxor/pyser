@@ -113,7 +113,8 @@ def play_video(filepath):
 	print "Done playing video, next?"
 
 all_numbers = re.compile('\d+') 
-series_no = re.compile('.*[Ss]\d{2}[Ee](\d+)' )  #series syntax - blabla_S01E12
+series_no = re.compile('.*[Ss]?\d+[EeXx](\d+)')  #series syntax - blabla_S01E12, blabla-1x2 etc
+
 def check_episode(filename, episode):
 	if not keywords_pattern.match(filename):
 		return False
