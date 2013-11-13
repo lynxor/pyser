@@ -39,7 +39,6 @@ def is_video_file(f):
 	return False
 
 def list_files(files):
-
 	for (n,f) in enumerate(files):
 		print str(n + 1) + ". " + f
 
@@ -73,6 +72,15 @@ def menu(episode_no):
 	else:
 		print "Invalid option chosen"
 		menu(episode_no)
+
+def latest():
+
+	applicable = [ get_episode_no(f) for f in video_files() if check_keyword(f) and get_episode_no(f) != -1 ]
+	if len(applicable) > 0:
+		menu( sorted(applicable)[-1] )
+	else:
+		print "Nothing found - only proper series syntax is supported e.g S01E01 etc."
+
 
 def tsuzuke():
 	print "continuing..."
@@ -112,19 +120,32 @@ def play_video(filepath):
 	output = process.communicate()[0]
 	print "Done playing video, next?"
 
+#REGEX STUFF
 all_numbers = re.compile('\d+') 
 series_no = re.compile('.*[Ss]?\d+[EeXx](\d+)')  #series syntax - blabla_S01E12, blabla-1x2 etc
 
+def check_keyword(filename):
+	return keywords_pattern.match(filename)
+
 def check_episode(filename, episode):
-	if not keywords_pattern.match(filename):
+	if not check_keyword(filename):
 		return False
 
 	if series_no.match(filename):
-		return episode == int(series_no.match(filename).group(1))
+		return episode == get_episode_no(filename)
 	for number in all_numbers.finditer(filename):
 		if episode == int(number.group(0)):
 			return True
 	return False
+
+def get_episode_no(filename):
+	if series_no.match(filename):
+		return int(series_no.match(filename).group(1))
+	#Not series syntax - return the first number found
+	return int(re.compile('.*?(\d+)').match(filename).group(1))
+
+	
+
 
 
 
@@ -139,7 +160,14 @@ parser.add_argument('-d', '--deep', dest="deep", action='store_true', help='Sear
 parser.add_argument("episode", nargs="?", type=int, help='Number of episode')
 parser.add_argument("-p", "--path", dest="path", help='Custom path, default is .')
 parser.add_argument("-k", "--keywords", dest="keywords", help='Keywords for searching eps, comma separated')
+parser.add_argument("-l", "--latest", dest="latest", help="The last episode available")
 args = parser.parse_args()
+
+def init_keywords(keywords_raw):
+	keywords = keywords_raw.split(",")
+	lookaround_keywords = [ ("(?=.*" + f + ")") for f in keywords ]
+	str_regex = "^" + "".join(lookaround_keywords) + ".*$"
+	keywords_pattern = re.compile(str_regex, re.IGNORECASE)
 
 if(args.path != None):
 	mypath = join(mypath, args.path)
@@ -148,17 +176,16 @@ if(args.path != None):
 continue_file = join(mypath, ".series_continue")
 
 if(args.keywords != None):
-	keywords = args.keywords.split(",")
-	lookaround_keywords = [ ("(?=.*" + f + ")") for f in keywords ]
-	str_regex = "^" + "".join(lookaround_keywords) + ".*$"
-	keywords_pattern = re.compile(str_regex, re.IGNORECASE)
-	
+	init_keywords(args.keywords)
 
 if args.status:
 	status()
 
 elif args.tsuzuke:
 	tsuzuke()
+elif args.latest:
+	init_keywords(args.latest)
+	latest()
 else:
 	if(args.episode == None):
 		print "Please provide an episode number"
