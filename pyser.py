@@ -9,7 +9,7 @@ from os.path import isfile, join, walk
 import signal
 
 
-filetypes=['mkv','avi','mpg','mp4']
+filetypes=['mkv','avi','mpg','mpe', 'mpeg', 'mp4', 'flv', 'mov', 'wmv', 'asf']
 mypath = "./"
 keywords_pattern = re.compile(".*")
 keywords = None
@@ -34,13 +34,13 @@ def deep_files(dir, depth):
 
 def is_video_file(f):
 	for t in filetypes:
-		if f.endswith(t):
+		if f.lower().endswith(t):
 			return True
 	return False
 
 def list_files(files):
 	for (n,f) in enumerate(files):
-		print str(n + 1) + ". " + f
+		print str(n + 1) + ". " + os.path.basename(f)
 
 def read_int():
 		line = raw_input()
